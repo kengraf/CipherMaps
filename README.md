@@ -1,6 +1,6 @@
-$ CipherMaps
+# CipherMaps
 
-[New Hampshire based map](./NH.html)
-[United States based map](./US.html)
-[World based map](./World.html)
+[New Hampshire based map](./treasuremap.html?region=NH)  
+[United States based map](./treasuremap.html?region=US)  
+[World based map](./treasuremap.html?region=WORLD)  
 
