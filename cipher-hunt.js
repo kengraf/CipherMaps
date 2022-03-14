@@ -4,7 +4,7 @@ var huntRegion = huntURL.searchParams.get("region")
 
 // Read game data
 var hunt = jQuery.ajax({
-    url: huntRegion + 'hunt.json',
+    url: huntRegion + '.json',
     async: false,
     error: function(xhr, status, error){
          var errorMessage = xhr.status + ': ' + xhr.statusText
