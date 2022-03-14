@@ -5,7 +5,7 @@
 - Change the Maps API key in index.html to be a key you own.
 - This repo provides three maps (NH, US, and WORLD) with three corresponding json files.
 - You can modify an existing map or create new.
-- Invoke URL is: https://<your-domain>/?Region=<your-map-name>
+- Invoke URL format is: https://_your-domain_/?Region=_your-map-name_
 
 ### NOTE
 The web app deployment links below are currently tied to Google Firebase.  The Map API key is restricted to the domain "ciphermaps.web.app".  You will need your own Maps API key for your domain.
