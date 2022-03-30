@@ -15,3 +15,4 @@ The web app deployment links below are currently tied to Google Firebase.  The M
 [United States based map](https://ciphermaps.web.app/?region=US)  
 [World based map](https://ciphermaps.web.app/?region=WORLD)  
 
+More details [here](https://github.com/kengraf/GenCyber#thursday-virtual-treasure-hunts-lesson-plan), the lesson plan contains solutions.
