@@ -5,18 +5,18 @@
     "puzzles": [
      {
         "id": "1",
-        "title": "Hack The Box",
+        "title": "Spy Museum",
         "story": {
-            "image": "images/hackthebox.png",
-            "link": "https://app.hackthebox.eu/home",
-            "imageCaption": "NSA outreach effort",
-            "url": "https://www.nsa.gov/about/cryptologic-heritage/museum/"
+            "image": "images/spymuseum.png",
+            "link": "https://www.spymuseum.org/",
+            "imageCaption": "Image of building exterior",
+            "url": "https://www.spymuseum.org/exhibition-experiences/"
             },
         "position": { "lat": 38.88401, "lng": -77.02547 },
         "link": "",
-        "riddle": "Who is the highest scoring student on the UNH team?<br>Note: If you have privacy concerns you can register with an alias and 10 minute email.",
-        "answer": "hackermario",
-        "md5": "79391f9088d65e51e475413168de6f54"
+        "riddle": "What floor is the briefing center on?",
+        "answer": "5",
+        "md5": "e4da3b7fbbce2345d7772b0674a318d5"
 
     },
      {
