@@ -66,7 +66,6 @@ invalidation() {
 cf() {
     STACK_NAME="${DEPLOYNAME}-distribution"
     echo "Deploy CloudFormation(CF) Stack=$STACK_NAME..."
-    ENDPOINT=`aws cloudformation describe-stacks --stack-name cipher-maps-backend  --query "Stacks[0].Outputs[?OutputKey=='ApiEndpoint'].OutputValue" --output=text`
     aws cloudformation deploy --stack-name ${STACK_NAME} \
       --template-file distribution.json --disable-rollback \
       --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND CAPABILITY_IAM \
@@ -75,17 +74,6 @@ cf() {
           HostedZoneId=$HOSTEDZONEID CertificateArn=$CERTARN ApiEndpoint=$ENDPOINT
 
     aws cloudformation describe-stacks --stack-name ${STACK_NAME} | jq .Stacks[0].Outputs
-
-    echo "Update Gateway CORS settings"
-    API_ID=`aws apigatewayv2 get-apis --query "Items[?Name=='cipher-maps'].ApiId" --output text`
-
-    aws apigatewayv2 update-api --api-id ${API_ID} \
-        --cors-configuration '{
-            "AllowOrigins": ["https://cipher-maps.kengraf.com"],
-            "AllowMethods": ["GET", "POST", "OPTIONS"],
-            "AllowHeaders": ["Content-Type"],
-            "AllowCredentials": true
-            }'
 }
 
 tests() {
