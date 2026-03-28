@@ -2,8 +2,6 @@
 
 # Read the deployment variables
 export $(grep -v '^#' .env | xargs -I {} echo {} | tr -d '\r')
-S3BUCKET=cipher-maps
-DEPLOY_NAME=cipher-maps
 
 # Define the functions
 zips() {
