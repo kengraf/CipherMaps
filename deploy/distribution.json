@@ -9,27 +9,6 @@
     }    
   },
   "Resources": {
-    "BucketPolicy": {
-      "Type": "AWS::S3::BucketPolicy",
-      "Properties": {
-        "Bucket": "cipher-maps",
-        "PolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::Sub": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}"
-                }
-              },
-              "Action": "s3:GetObject",
-              "Resource": "arn:aws:s3:::cipher-maps/*"
-            }
-          ]
-        }
-      }
-    },
     "CloudFrontOriginAccessIdentity": {
       "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
       "Properties": {
