@@ -2,11 +2,6 @@
   "AWSTemplateFormatVersion": "2010-09-09",
 
   "Parameters": {
-    "ApiEndpoint": {
-      "Type": "String",
-      "Description": "Gateway endpoint",
-      "Default": ""
-    },
     "CertificateArn": {
       "Type": "String",
       "Description": "ARN of the ACM certificate for the custom domain. Leave blank if not using a custom domain.",
@@ -84,16 +79,6 @@
                   "Fn::Sub": "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
                 }
               }
-            },
-            {
-              "Id": "ApiOrigin",
-              "DomainName": {
-                  "Fn::Select" : [ 1, "Fn::Split" : [ "://", 
-                  { "Ref": "ApiEndpoint" } ]] },
-              "OriginPath": "",
-              "CustomOriginConfig": {
-                "OriginProtocolPolicy": "https-only"
-              }
             }
           ],
           "DefaultCacheBehavior": {
@@ -107,20 +92,6 @@
               "Cookies": { "Forward": "none" }
             }
           },
-          "CacheBehaviors": [
-            {
-              "PathPattern": "/api/*",
-              "TargetOriginId": "ApiOrigin",
-              "ViewerProtocolPolicy": "redirect-to-https",
-              "AllowedMethods": ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
-              "CachedMethods": ["GET", "HEAD"],
-              "Compress": true,
-              "CachePolicyId": { "Ref": "SetCookieCachePolicy" },
-              "MinTTL": 0,
-              "DefaultTTL": 0,
-              "MaxTTL": 0
-            }
-          ],
           "ViewerCertificate": {
                 "AcmCertificateArn": { "Ref": "CertificateArn" },
                 "SslSupportMethod": "sni-only",
