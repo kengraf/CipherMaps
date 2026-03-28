@@ -2,6 +2,7 @@
 var huntURL = new URL(window.location.href);
 var huntRegion = huntURL.searchParams.get("region")
 
+if(huntRegion == null) window.location.href = '/error.html';
 // Read game data
 var hunt = jQuery.ajax({
     url: huntRegion + '.json',
