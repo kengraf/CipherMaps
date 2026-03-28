@@ -30,31 +30,6 @@
         }
       }
     },
-    "SetCookieCachePolicy":  {
-      "Type": "AWS::CloudFront::CachePolicy",
-      "Properties": {
-        "CachePolicyConfig": {
-          "Name": "AllowSetCookieCachePolicy-first10",
-          "Comment": "Policy to allow Set-Cookie headers by forwarding all cookies",
-          "DefaultTTL": 1,
-          "MaxTTL": 1,
-          "MinTTL": 0,
-          "ParametersInCacheKeyAndForwardedToOrigin": {
-            "CookiesConfig": {
-              "CookieBehavior": "all"
-            },
-            "HeadersConfig": {
-              "HeaderBehavior": "none"
-            },
-            "QueryStringsConfig": {
-              "QueryStringBehavior": "none"
-            },
-            "EnableAcceptEncodingGzip": true,
-            "EnableAcceptEncodingBrotli": true
-          }
-        }
-      }
-    },
     "CloudFrontOriginAccessIdentity": {
       "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
       "Properties": {
@@ -81,17 +56,6 @@
               }
             }
           ],
-          "DefaultCacheBehavior": {
-            "TargetOriginId": "S3Origin",
-            "ViewerProtocolPolicy": "redirect-to-https",
-            "AllowedMethods": ["GET", "HEAD", "OPTIONS"],
-            "CachedMethods": ["GET", "HEAD"],
-            "Compress": true,
-            "ForwardedValues": {
-              "QueryString": false,
-              "Cookies": { "Forward": "none" }
-            }
-          },
           "ViewerCertificate": {
                 "AcmCertificateArn": { "Ref": "CertificateArn" },
                 "SslSupportMethod": "sni-only",
