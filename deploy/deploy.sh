@@ -1,0 +1,152 @@
+#!/bin/bash
+
+# Read the deployment variables
+export $(grep -v '^#' .env | xargs -I {} echo {} | tr -d '\r')
+S3BUCKET=cipher-maps
+DEPLOY_NAME=cipher-maps
+
+# Define the functions
+zips() {
+    echo "Packaging and uploading the lambda functions"
+    cd lambda
+    if [ ! -e "google-package.zip" ]; then
+        echo "Add required libraries to verifyToken.zip"
+        mkdir package
+        pip install --target ./package google-auth requests
+        pip install --platform manylinux2014_x86_64 --target=./package --implementation cp --python-version 3.14 --only-binary=:all: --upgrade cffi
+        cd package/
+        zip -r ../google-package.zip .
+        cd ..
+    fi
+    cp google-package.zip verifyToken.zip
+    
+    declare -a arr=("databaseItems" "verifyToken")
+    for i in "${arr[@]}"
+    do
+      zip $i.zip $i.py
+      aws s3 cp $i.zip s3://${S3BUCKET}/api/
+    done
+    cd ..
+}
+
+s3() {
+    if aws s3api head-bucket --bucket "$S3BUCKET" 2>/dev/null; then
+        echo "Bucket '$S3BUCKET' exists."
+    else
+        echo "Creating bucket '$S3BUCKET'."
+        aws cloudformation deploy --stack-name ${DEPLOYNAME}-s3 --template-file s3.yaml \
+            --capabilities CAPABILITY_NAMED_IAM --output text \
+            --parameter-overrides  S3BUCKET=$S3BUCKET DEPLOYNAME=$DEPLOYNAME \
+                DOMAINNAME=$DOMAINNAME
+    fi
+}
+
+website() {
+    echo "Uploading website content"
+    pushd ../website
+    cd data
+    aws s3 sync . s3://$S3BUCKET/data --content-type "application/json"
+    cd ../
+    aws s3 sync . s3://$S3BUCKET/
+    popd
+    invalidation
+}
+
+invalidation() {
+    FRONT_ID=`aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[?contains(DomainName, 'cipher-maps.s3.us-east-2.amazonaws.com')]].Id" --output=text`
+    if [ $FRONT_ID ]; then
+        V_ID=`aws cloudfront create-invalidation --distribution-id ${FRONT_ID} --paths "/*" \
+		--query "Invalidation.Id" --output=text`
+	echo "waiting"
+	aws cloudfront wait invalidation-completed --distribution-id ${FRONT_ID} --id ${V_ID}
+	echo "done"
+    fi
+}
+
+cf() {
+    STACK_NAME="${DEPLOYNAME}-distribution"
+    echo "Deploy CloudFormation(CF) Stack=$STACK_NAME..."
+    ENDPOINT=`aws cloudformation describe-stacks --stack-name cipher-maps-backend  --query "Stacks[0].Outputs[?OutputKey=='ApiEndpoint'].OutputValue" --output=text`
+    aws cloudformation deploy --stack-name ${STACK_NAME} \
+      --template-file distribution.json --disable-rollback \
+      --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND CAPABILITY_IAM \
+      --force-upload --output text --parameter-overrides \
+          S3bucket=$S3BUCKET Deployname=$DEPLOYNAME Domainname=$DOMAINNAME \
+          HostedZoneId=$HOSTEDZONEID CertificateArn=$CERTARN ApiEndpoint=$ENDPOINT
+
+    aws cloudformation describe-stacks --stack-name ${STACK_NAME} | jq .Stacks[0].Outputs
+
+    echo "Update Gateway CORS settings"
+    API_ID=`aws apigatewayv2 get-apis --query "Items[?Name=='cipher-maps'].ApiId" --output text`
+
+    aws apigatewayv2 update-api --api-id ${API_ID} \
+        --cors-configuration '{
+            "AllowOrigins": ["https://cipher-maps.kengraf.com"],
+            "AllowMethods": ["GET", "POST", "OPTIONS"],
+            "AllowHeaders": ["Content-Type"],
+            "AllowCredentials": true
+            }'
+}
+
+tests() {
+    echo "Executing Test functions..."
+    pushd ../tests
+    python3 fullTest.py
+    popd
+}
+
+backend() {
+  echo "Deploying backend components (apigatewayv2, lambda, dynamodb)"
+  STACK_NAME="${DEPLOYNAME}-backend"
+  aws cloudformation deploy --stack-name ${STACK_NAME} \
+    --template-file backend.json \
+    --capabilities CAPABILITY_NAMED_IAM \
+    --parameter-overrides \
+        S3bucketName=${S3BUCKET} \
+        DeployName=${DEPLOYNAME} \
+    --output text
+  echo "Waiting on ${STACK_NAME} create completion..."
+  aws cloudformation describe-stacks --stack-name ${STACK_NAME} | jq .Stacks[0].Outputs
+}
+
+build() {
+    echo "Executing BUild functions..."
+    s3
+    website
+    zips
+    backend
+    cf
+}
+
+setup() {
+    echo "setup"
+}
+
+run() {
+    echo "run"
+}
+
+# If no arguments are provided, execute all functions
+if [ $# -eq 0 ]; then
+    build
+    tests
+    setup
+    run
+else
+    # Loop through provided arguments and execute matching functions
+    for arg in "$@"; do
+        case "$arg" in
+            zips) zips ;;
+            website) website ;;
+            invalidation) invalidation ;;
+            s3) s3 ;;
+            backend) backend ;;
+            cf) cf ;;
+            tests) tests ;;
+            setup) setup ;;
+            run) run ;;
+            build) build ;;
+            *) echo "Invalid argument: $arg" ;;
+        esac
+    done
+fi
