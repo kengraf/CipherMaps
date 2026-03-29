@@ -42,9 +42,6 @@ s3() {
 website() {
     echo "Uploading website content"
     pushd ../website
-    cd data
-    aws s3 sync . s3://$S3BUCKET/data --content-type "application/json"
-    cd ../
     aws s3 sync . s3://$S3BUCKET/
     popd
     invalidation
