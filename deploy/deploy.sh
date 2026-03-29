@@ -69,7 +69,7 @@ cf() {
       --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND CAPABILITY_IAM \
       --force-upload --output text --parameter-overrides \
           S3bucket=$S3BUCKET Deployname=$DEPLOYNAME Domainname=$DOMAINNAME \
-          HostedZoneId=$HOSTEDZONEID CertificateArn=$CERTARN ApiEndpoint=$ENDPOINT
+          HostedZoneId=$HOSTEDZONEID CertificateArn=$CERTARN --debug
 
     aws cloudformation describe-stacks --stack-name ${STACK_NAME} | jq .Stacks[0].Outputs
 }
