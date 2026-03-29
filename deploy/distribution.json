@@ -1,6 +1,18 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
 
+  "Parameters": {
+    "ApiEndpoint": {
+      "Type": "String",
+      "Description": "Gateway endpoint",
+      "Default": ""
+    },
+    "CertificateArn": {
+      "Type": "String",
+      "Description": "ARN of the ACM certificate for the custom domain. Leave blank if not using a custom domain.",
+      "Default": ""
+    }    
+  },
   "Resources": {
     "CloudFrontOriginAccessIdentity": {
       "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
